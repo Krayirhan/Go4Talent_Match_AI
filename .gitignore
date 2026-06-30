@@ -1,0 +1,7 @@
+*_page-*.png
+Thumbs.db
+.DS_Store
+node_modules/
+.next/
+dist/
+out/

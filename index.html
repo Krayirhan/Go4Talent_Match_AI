@@ -1,0 +1,537 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Go4Talent MatchAI</title>
+    <meta
+      name="description"
+      content="Go4Talent MatchAI, ise alim sureclerini hizlandiran, aday-pozisyon uyumunu olcen ve yerli AI altyapisiyla gelisen yeni nesil secme ve yerlestirme platformudur."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Manrope:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <!-- Background SVG Gradients Definition -->
+    <svg style="position: absolute; width: 0; height: 0;" width="0" height="0">
+      <defs>
+        <linearGradient id="cyanGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#00f5d4" />
+          <stop offset="100%" stop-color="#059669" />
+        </linearGradient>
+      </defs>
+    </svg>
+
+    <span class="glow-2"></span>
+
+    <div class="page-shell">
+      <header class="topbar">
+        <a class="brand" href="#hero">
+          <span class="brand-mark">G4</span>
+          <span class="brand-copy">
+            <strong>Go4Talent MatchAI</strong>
+            <small>AI destekli seçme ve yerleştirme platformu</small>
+          </span>
+        </a>
+
+        <nav class="nav">
+          <a href="#problem">Problem</a>
+          <a href="#solution">Çözüm</a>
+          <a href="#modules">Modüller</a>
+          <a href="#mvp">MVP</a>
+        </nav>
+
+        <div class="topbar-actions">
+          <button id="theme-toggle" class="theme-toggle-btn" aria-label="Tema Değiştir">
+            <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+            <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+          </button>
+          <a class="button button-ghost" href="#contact">İletişime Geç</a>
+        </div>
+      </header>
+
+      <main>
+        <!-- Hero Section with Interactive Match Simulator -->
+        <section class="hero" id="hero">
+          <div class="hero-copy">
+            <p class="eyebrow">Yerli HR Tech Altyapısı</p>
+            <h1>Doğru adayı, daha hızlı ve ölçülebilir bulun.</h1>
+            <p class="lead">
+              Go4Talent MatchAI, CV analizi, aday-pozisyon eşleştirmesi,
+              ön görüşme otomasyonu ve raporlama akışını tek bir üründe birleştirir.
+            </p>
+
+            <div class="hero-actions">
+              <a class="button button-primary" href="#contact">Demo Talep Et</a>
+              <a class="button button-secondary" href="#modules">Özellikleri Dene</a>
+            </div>
+
+            <ul class="hero-metrics">
+              <li>
+                <strong>5 Çekirdek Modül</strong>
+                <span>CV analizinden dashboard'a kadar bütün akış</span>
+              </li>
+              <li>
+                <strong>KVKK Odaklı</strong>
+                <span>Yerli, kontrollü ve geliştirilebilir mimari</span>
+              </li>
+              <li>
+                <strong>MVP Hazırlığı</strong>
+                <span>Düşük maliyetli ilk sürüm, ML için açık altyapı</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Interactive CV Match Simulator Widget -->
+          <div class="hero-card">
+            <div class="simulator-card">
+              <div class="simulator-header">
+                <span class="sim-dot green"></span>
+                <span class="sim-dot yellow"></span>
+                <span class="sim-dot red"></span>
+                <span class="sim-title">MatchAI Eşleştirme Simülatörü</span>
+              </div>
+              
+              <div class="simulator-body">
+                <div class="sim-controls">
+                  <div class="sim-select-group">
+                    <label for="candidate-select">Aday CV'si Seç:</label>
+                    <select id="candidate-select">
+                      <option value="developer">Can Yılmaz - Go Developer (3 Yıl Deneyim)</option>
+                      <option value="sales">Elif Demir - Kurumsal Satış (5 Yıl Deneyim)</option>
+                      <option value="recruiter">Merve Kaya - İK Danışmanı (1 Yıl Deneyim)</option>
+                    </select>
+                  </div>
+                  <div class="sim-select-group">
+                    <label for="role-select">Aranan Rol / Pozisyon:</label>
+                    <select id="role-select">
+                      <option value="backend">Go Backend Developer (Medium)</option>
+                      <option value="sales-lead">Enterprise Sales Executive</option>
+                      <option value="hr-recruiter">Technical Recruiter (Junior)</option>
+                    </select>
+                  </div>
+                  <button id="sim-run-btn" class="button button-primary w-full">Analizi Başlat</button>
+                </div>
+
+                <!-- Simulation Progress / Logger Screen -->
+                <div id="sim-console" class="sim-console" style="display: none;">
+                  <div class="console-line"></div>
+                </div>
+
+                <!-- Simulation Output Panel -->
+                <div id="sim-result-panel" class="sim-result-panel" style="display: none;">
+                  <div class="sim-result-header">
+                    <div class="sim-score-box">
+                      <span class="score-percent" id="sim-score-value">89%</span>
+                      <span class="score-label">Uyum Skoru</span>
+                    </div>
+                    <div class="sim-gauge-wrapper">
+                      <svg class="circle-svg" width="70" height="70">
+                        <circle class="circle-bg" cx="35" cy="35" r="28" />
+                        <circle id="sim-circle-val" class="circle-val" cx="35" cy="35" r="28" style="stroke-dasharray: 175.9; stroke-dashoffset: 175.9;" />
+                      </svg>
+                    </div>
+                  </div>
+
+                  <div class="sim-skills-analysis">
+                    <div class="sim-skill-section">
+                      <p class="sim-section-title">Eşleşen Sert Yetenekler (Hard Skills)</p>
+                      <div class="sim-tags" id="sim-hard-tags">
+                        <!-- Filled by JS -->
+                      </div>
+                    </div>
+                    <div class="sim-skill-section">
+                      <p class="sim-section-title">Sosyal Yetenekler (Soft Skills)</p>
+                      <div class="sim-tags" id="sim-soft-tags">
+                        <!-- Filled by JS -->
+                      </div>
+                    </div>
+                    <div class="sim-recommendation">
+                      <span class="rec-badge" id="sim-rec-badge">Şiddetle Önerilir</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="logos-band">
+          <p>İş akışını sadeleştirir, karar kalitesini yükseltir, işe alım sürecini hızlandırır.</p>
+        </section>
+
+        <!-- Problem Section -->
+        <section class="section split-section" id="problem">
+          <div class="section-heading">
+            <p class="eyebrow">Problem</p>
+            <h2>Bugün işe alım süreçleri hala parçalı, manuel ve subjektif ilerliyor.</h2>
+          </div>
+
+          <div class="problem-grid">
+            <article class="info-card">
+              <div class="info-card-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+              </div>
+              <h3>Dağınık veri</h3>
+              <p>CV, notlar, görüşmeler ve pozisyon beklentileri farklı kanallarda dağınık kalıyor.</p>
+            </article>
+            <article class="info-card">
+              <div class="info-card-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              </div>
+              <h3>Yavaş eleme</h3>
+              <p>İnsan gücüne dayalı eleme süreçleri zaman ve maliyet kaybı yaratıyor.</p>
+            </article>
+            <article class="info-card">
+              <div class="info-card-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
+              </div>
+              <h3>Ölçülemeyen uyum</h3>
+              <p>Aday ile pozisyon uyumu çoğu zaman veriyle değil sezgiyle değerlendiriliyor.</p>
+            </article>
+            <article class="info-card">
+              <div class="info-card-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+              </div>
+              <h3>Standartsız raporlama</h3>
+              <p>Müşteri tarafında karar vermeyi kolaylaştıran ortak bir rapor yapısı oluşmuyor.</p>
+            </article>
+          </div>
+        </section>
+
+        <!-- Solution Section -->
+        <section class="section" id="solution">
+          <div class="section-heading">
+            <p class="eyebrow">Çözüm</p>
+            <h2>Go4Talent MatchAI, seçme ve yerleştirme sürecini tek panelden yönetir.</h2>
+            <p>
+              İlk aşamada çalışır bir MVP, ikinci aşamada ise Go4Talent verisiyle
+              eğitilecek yerli NLP/ML katmanı hedeflenir.
+            </p>
+          </div>
+
+          <div class="solution-flow">
+            <article>
+              <span>01</span>
+              <h3>CV ve aday verisi işlenir</h3>
+              <p>Dokümanlar, aday bilgileri ve rol geçmişi standart bir veri modeline oturtulur.</p>
+            </article>
+            <article>
+              <span>02</span>
+              <h3>Yetkinlik skoru hesaplanır</h3>
+              <p>Hard skill, soft skill, deneyim, eğitim ve rol beklentileri birlikte değerlendirilir.</p>
+            </article>
+            <article>
+              <span>03</span>
+              <h3>Aday-pozisyon eşleşmesi üretilir</h3>
+              <p>İlk aşamada kural tabanlı, ileride veriyle güçlenen tahminsel skor yapısı kurulur.</p>
+            </article>
+            <article>
+              <span>04</span>
+              <h3>Ön görüşme ve raporlama tamamlanır</h3>
+              <p>Otomatik soru akışı, skorlar ve karar çıktıları tek dashboard'da toplanır.</p>
+            </article>
+          </div>
+        </section>
+
+        <!-- Modules Section - REDESIGNED as a Dynamic Interactive Playground -->
+        <section class="section" id="modules">
+          <div class="section-heading">
+            <p class="eyebrow">Ürün Modülleri</p>
+            <h2>Platform yeteneklerini canlı simüle edin ve keşfedin</h2>
+          </div>
+
+          <div class="playground-layout">
+            <!-- Left Tabs Column -->
+            <div class="playground-tabs">
+              <button class="playground-tab active" data-tab="cv-parser">
+                <div class="tab-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+                </div>
+                <div class="tab-text">
+                  <h3>AI CV Analiz Motoru</h3>
+                  <p>CV'den rol, beceri, yetkinlik ve geçmiş deneyim çıkarımı.</p>
+                </div>
+              </button>
+              
+              <button class="playground-tab" data-tab="comp-map">
+                <div class="tab-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+                </div>
+                <div class="tab-text">
+                  <h3>Yetkinlik Haritası</h3>
+                  <p>Aday profillerini ideal rol şablonları ile eşleştirme.</p>
+                </div>
+              </button>
+              
+              <button class="playground-tab" data-tab="match-breakdown">
+                <div class="tab-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+                </div>
+                <div class="tab-text">
+                  <h3>Match Score</h3>
+                  <p>Deneyim, yetenek ve uyum oranının matematiksel analizi.</p>
+                </div>
+              </button>
+              
+              <button class="playground-tab" data-tab="bot-chat">
+                <div class="tab-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                </div>
+                <div class="tab-text">
+                  <h3>Otomatik Ön Görüşme</h3>
+                  <p>Soru akışları, cevap toplama ve anlık analiz.</p>
+                </div>
+              </button>
+
+              <button class="playground-tab" data-tab="hr-dashboard">
+                <div class="tab-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="9" y1="9" x2="21" y2="9"/></svg>
+                </div>
+                <div class="tab-text">
+                  <h3>Müşteri Dashboard'u</h3>
+                  <p>Aday havuzu ve pozisyonları tek panelden yönetme.</p>
+                </div>
+              </button>
+
+              <button class="playground-tab" data-tab="automations">
+                <div class="tab-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                </div>
+                <div class="tab-text">
+                  <h3>Raporlama ve Otomasyon</h3>
+                  <p>Aday süreçleri için tek tuşla özet PDF raporları üretme.</p>
+                </div>
+              </button>
+            </div>
+
+            <!-- Right Browser Preview Frame -->
+            <div class="playground-preview">
+              <div class="browser-mockup">
+                <div class="browser-header">
+                  <div class="browser-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </div>
+                  <div class="browser-url">go4talent.ai/match-dashboard</div>
+                </div>
+                <div class="browser-content">
+                  
+                  <!-- Tab 1 View: AI CV Analiz Motoru -->
+                  <div id="view-cv-parser" class="preview-view active">
+                    <div class="cv-parser-mock">
+                      <div class="mock-cv-header">
+                        <div class="avatar-placeholder">CY</div>
+                        <div class="name-block">
+                          <h4>Can Yılmaz</h4>
+                          <p>Go Backend Developer | Ankara</p>
+                        </div>
+                      </div>
+                      <div class="mock-extracted-skills">
+                        <p class="sub-heading">Çıkarılan Yetenekler (NLP Extraction)</p>
+                        <div class="extracted-tags">
+                          <span class="tag tag-extracted">Go (Golang)</span>
+                          <span class="tag tag-extracted">Docker</span>
+                          <span class="tag tag-extracted">Kubernetes</span>
+                          <span class="tag tag-extracted">PostgreSQL</span>
+                          <span class="tag tag-extracted">gRPC</span>
+                          <span class="tag tag-extracted">REST API</span>
+                        </div>
+                      </div>
+                      <div class="mock-experience-timeline">
+                        <p class="sub-heading">Deneyim Geçmişi</p>
+                        <div class="timeline-item">
+                          <strong>Software Engineer</strong>
+                          <span class="timeline-date">2023 - Günümüz</span>
+                          <p>Go mikroservis mimarileri yönetimi, veritabanı optimizasyonu.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Tab 2 View: Yetkinlik Haritası -->
+                  <div id="view-comp-map" class="preview-view">
+                    <div class="comp-map-mock">
+                      <h4 class="mock-title">Yetkinlik Eşleşme Matrisi</h4>
+                      <p class="mock-desc">Aday yeteneklerinin ideal pozisyon gereksinimleri ile ağırlık karşılaştırması.</p>
+                      <div class="comp-bars-list">
+                        <div class="comp-bar-item">
+                          <div class="comp-label">Golang Bilgisi (Aranan: Senior)</div>
+                          <div class="comp-progress-track">
+                            <div class="comp-progress-bar" style="width: 85%;">85%</div>
+                          </div>
+                        </div>
+                        <div class="comp-bar-item">
+                          <div class="comp-label">Veritabanı ve NoSQL (Aranan: Medium)</div>
+                          <div class="comp-progress-track">
+                            <div class="comp-progress-bar" style="width: 90%;">90%</div>
+                          </div>
+                        </div>
+                        <div class="comp-bar-item">
+                          <div class="comp-label">Sistem Mimarisi (Aranan: Senior)</div>
+                          <div class="comp-progress-track">
+                            <div class="comp-progress-bar" style="width: 60%; background: var(--primary);">60%</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Tab 3 View: Match Score -->
+                  <div id="view-match-breakdown" class="preview-view">
+                    <div class="match-breakdown-mock">
+                      <div class="score-flex-hero">
+                        <div class="score-circle-lg">
+                          <strong>89%</strong>
+                          <span>TOPLAM SKOR</span>
+                        </div>
+                        <div class="score-breakdown-details">
+                          <div class="score-row"><span>Sert Yetenekler (Hard Skills)</span> <strong>92%</strong></div>
+                          <div class="score-row"><span>Deneyim Süresi (Experience)</span> <strong>80%</strong></div>
+                          <div class="score-row"><span>Sosyal Uyum (Soft Skills)</span> <strong>85%</strong></div>
+                          <div class="score-row"><span>Beklenti Eşleşmesi (Salary)</span> <strong>100%</strong></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Tab 4 View: Otomatik Ön Görüşme -->
+                  <div id="view-bot-chat" class="preview-view">
+                    <div class="bot-chat-mock">
+                      <div class="chat-header">
+                        <div class="bot-avatar">🤖</div>
+                        <div>
+                          <strong>Go4Talent ChatBot</strong>
+                          <p>Ön Değerlendirme Simülasyonu</p>
+                        </div>
+                      </div>
+                      <div class="chat-messages">
+                        <div class="msg msg-bot">
+                          Merhaba Can Bey! Projenizde Go dilinde kanal (channels) yapısını kullanarak veri yarışı (race condition) durumunu nasıl çözersiniz?
+                        </div>
+                        <div class="msg msg-candidate">
+                          Genellikle sync.Mutex kilitleme yapısını kullanırım ya da veriyi doğrudan thread-safe kanallar üzerinden geçirmeyi tercih ederim.
+                        </div>
+                        <div class="msg msg-bot-eval">
+                          <span>Analiz Sinyali:</span> Teknik bilgi doğruluğu yüksek. Eşzamanlılık (concurrency) hakimiyeti var.
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Tab 5 View: Müşteri Dashboard'u -->
+                  <div id="view-hr-dashboard" class="preview-view">
+                    <div class="hr-dashboard-mock">
+                      <div class="db-stats">
+                        <div class="stat-box"><strong>4</strong><span>Aktif Rol</span></div>
+                        <div class="stat-box"><strong>128</strong><span>Başvuru</span></div>
+                        <div class="stat-box"><strong>18</strong><span>Eşleşen</span></div>
+                      </div>
+                      <div class="mock-table">
+                        <div class="table-header">
+                          <span>Aday</span>
+                          <span>Rol</span>
+                          <span>Uyum</span>
+                        </div>
+                        <div class="table-row">
+                          <span>Can Yılmaz</span>
+                          <span>Go Dev</span>
+                          <span class="badge-green">89%</span>
+                        </div>
+                        <div class="table-row">
+                          <span>Elif Demir</span>
+                          <span>Sales Exec</span>
+                          <span class="badge-green">94%</span>
+                        </div>
+                        <div class="table-row">
+                          <span>Ahmet Kaya</span>
+                          <span>React Dev</span>
+                          <span class="badge-yellow">72%</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Tab 6 View: Raporlama ve Otomasyon -->
+                  <div id="view-automations" class="preview-view">
+                    <div class="automations-mock">
+                      <div class="report-card-mock">
+                        <div class="pdf-icon">📄</div>
+                        <div class="pdf-details">
+                          <strong>Can_Yilmaz_Eslesme_Raporu.pdf</strong>
+                          <p>Boyut: 1.2 MB | MatchAI Tarafından Üretildi</p>
+                        </div>
+                      </div>
+                      <div class="mock-actions">
+                        <button class="button button-primary"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:8px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Raporu İndir</button>
+                        <button class="button button-secondary">Yöneticilere Gönder</button>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- MVP / Architecture Section -->
+        <section class="section architecture" id="mvp">
+          <div class="section-heading">
+            <p class="eyebrow">MVP Yaklaşımı</p>
+            <h2>Düşük maliyetli başlangıç, yüksek gelişim potansiyeli</h2>
+          </div>
+
+          <div class="architecture-grid">
+            <div class="architecture-panel">
+              <h3>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                Bugün
+              </h3>
+              <ul>
+                <li>Çalışır, basit ve ücretsiz MVP</li>
+                <li>Manuel veri girişi + CV upload akışı</li>
+                <li>Kural tabanlı skorlama mantığı</li>
+                <li>Ücretli AI API kullanmadan operasyonel başlangıç</li>
+              </ul>
+            </div>
+
+            <div class="architecture-panel future">
+              <h3>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.886L5 9l4.886 1.912L12 17l1.912-4.886L19 11l-4.886-1.912z"/><path d="m5 3 1 2.5L8.5 6 6 7 5 9.5 4 7 1.5 6 4 5z"/><path d="m19 17 1 2.5 2.5.5-2.5 1-1 2.5-1-2.5-2.5-1 2.5-1z"/></svg>
+                Yarın
+              </h3>
+              <ul>
+                <li>Go4Talent verisiyle eğitilen yerli NLP/ML modelleri</li>
+                <li>Yetkinlik tahmini ve performans öngörüsü</li>
+                <li>Daha akilli eşleştirme ve özet çıkarma</li>
+                <li>Ar-Ge niteliğini koruyan veri odaklı ürünleşme</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="section cta-section" id="contact">
+          <div class="cta-card">
+            <p class="eyebrow">Sonraki Adım</p>
+            <h2>Go4Talent MatchAI için landing page hazır. Sıradaki adım demo akışı ve başvuru formu entegrasyonu.</h2>
+            <p>
+              Bu ilk sürüm, markanın ürün anlatımını netleştirir. Sonraki aşamada
+              form toplama, gerçek ekran mockup'ları ve iletişim entegrasyonları eklenebilir.
+            </p>
+            <a class="button button-primary" href="mailto:hello@go4talent.ai">hello@go4talent.ai</a>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
