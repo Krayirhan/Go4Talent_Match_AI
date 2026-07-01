@@ -4,6 +4,7 @@ FastAPI tabanlı CV analiz ve skill eşleştirme servisi.
 """
 from __future__ import annotations
 from typing import List, Optional
+import os
 import httpx
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -14,9 +15,12 @@ from app.matcher import skill_match_score
 
 app = FastAPI(title="Go4Talent ML Service", version="1.0.0")
 
+_raw_origins = os.environ.get("ALLOWED_ORIGINS", "http://localhost:5000,http://localhost:5001")
+_allowed_origins = [o.strip() for o in _raw_origins.split(",")]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5000", "http://localhost:5001"],
+    allow_origins=_allowed_origins,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -81,4 +85,5 @@ def match_score(req: MatchRequest):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=5002, reload=True)
+    port = int(os.environ.get("PORT", 5002))
+    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=False)

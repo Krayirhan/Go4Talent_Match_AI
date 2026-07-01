@@ -4,14 +4,19 @@ const cors = require('@fastify/cors');
 const { createClient } = require('@supabase/supabase-js');
 
 const app = Fastify({ logger: true });
+const ML_SERVICE_URL = process.env.ML_SERVICE_URL || process.env.ML_URL || 'http://localhost:5002';
 
 const supabase = createClient(
   process.env.SUPABASE_URL || 'https://vewfghckacbdgacpnqef.supabase.co',
   process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY || ''
 );
 
+const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',').map(s => s.trim())
+  : ['http://localhost:5000', 'http://localhost:3000'];
+
 app.register(cors, {
-  origin: ['http://localhost:5000', 'http://localhost:3000'],
+  origin: ALLOWED_ORIGINS,
   methods: ['GET', 'POST', 'PATCH', 'DELETE']
 });
 
@@ -49,6 +54,21 @@ app.get('/api/candidates', async (req, reply) => {
 // ── Match Score (kural tabanlı) ──
 app.post('/api/match-score', async (req, reply) => {
   const { candidateSkills = [], requiredSkills = [], preferredSkills = [] } = req.body || {};
+  try {
+    const upstream = await fetch(`${ML_SERVICE_URL}/api/match-score`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        candidate_skills: candidateSkills,
+        required_skills: requiredSkills,
+        preferred_skills: preferredSkills,
+      }),
+    });
+    if (upstream.ok) {
+      return await upstream.json();
+    }
+  } catch (err) {}
+
   const cands = candidateSkills.map(s => s.toLowerCase());
   const req70 = requiredSkills.map(s => s.toLowerCase());
   const pref30 = preferredSkills.map(s => s.toLowerCase());
@@ -60,6 +80,19 @@ app.post('/api/match-score', async (req, reply) => {
     required: { matched: req70.filter(s => cands.includes(s)), total: req70.length },
     preferred: { matched: pref30.filter(s => cands.includes(s)), total: pref30.length }
   };
+});
+
+app.get('/api/candidate-status-history', async (req, reply) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  const client = token ? createClient(
+    process.env.SUPABASE_URL || 'https://vewfghckacbdgacpnqef.supabase.co',
+    process.env.SUPABASE_ANON_KEY || '',
+    { global: { headers: { Authorization: `Bearer ${token}` } } }
+  ) : supabase;
+
+  const { data, error } = await client.from('candidate_status_history').select('*').order('changed_at', { ascending: true });
+  if (error) return reply.code(500).send({ error: error.message });
+  return data;
 });
 
 // ── Ön Görüşme ──

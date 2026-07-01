@@ -1,5 +1,5 @@
 import { sidebar, sidebarScript } from './sidebarMarkup';
-import { SB_URL, SB_KEY, sbHelpers } from '../lib/supabaseConfig';
+import { sbHelpers, BACKEND_URL } from '../lib/supabaseConfig';
 
 const raporlarMarkup = /* html */`
 <div class="dash-shell">
@@ -120,10 +120,12 @@ const raporlarMarkup = /* html */`
 <script>
 (function () {
   ${sbHelpers}
+  var BACKEND_URL = '${BACKEND_URL}';
 
   var allPositions = [];
   var allCandidates = [];
   var allHistory = [];
+  var currentDateFilter = 'all';
 
   function filterByDate(candidates, days) {
     if (!days || days === 'all') return candidates;
@@ -133,14 +135,15 @@ const raporlarMarkup = /* html */`
   }
 
   function exportCSV() {
+    var filteredCandidates = filterByDate(allCandidates, currentDateFilter);
     var rows = [['Ad Soyad','E-posta','Pozisyon','Skor','Durum','Tarih']];
-    allCandidates.forEach(function(c){
+    filteredCandidates.forEach(function(c){
       rows.push([
         c.name || '', c.email || '', c.position_title || '',
         c.score || 0, c.status || '', c.created_at ? new Date(c.created_at).toLocaleDateString('tr-TR') : ''
       ]);
     });
-    var csv = rows.map(function(r){ return r.map(function(v){ return '"'+(String(v).replace(/"/g,'""'))+'"'; }).join(','); }).join('\r\n');
+    var csv = rows.map(function(r){ return r.map(function(v){ return '"'+(String(v).replace(/"/g,'""'))+'"'; }).join(','); }).join('\\r\\n');
     var blob = new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8'});
     var url = URL.createObjectURL(blob);
     var a = document.createElement('a'); a.href=url; a.download='go4talent-rapor.csv'; a.click();
@@ -252,6 +255,7 @@ const raporlarMarkup = /* html */`
 
   document.getElementById('rap-date-filter').addEventListener('change', function() {
     var days = this.value;
+    currentDateFilter = days;
     var filtered = filterByDate(allCandidates, days);
     var filteredHistory = days === 'all' ? allHistory : (function() {
       var cutoff = new Date(); cutoff.setDate(cutoff.getDate() - parseInt(days));
@@ -262,9 +266,9 @@ const raporlarMarkup = /* html */`
 
   (async function () {
     var results = await Promise.all([
-      fetch(SB_URL + '/rest/v1/positions?select=*', { headers: sbHeaders() }).then(function(r){ return r.ok ? r.json() : []; }).catch(function(){ return []; }),
-      fetch(SB_URL + '/rest/v1/candidates?select=*', { headers: sbHeaders() }).then(function(r){ return r.ok ? r.json() : []; }).catch(function(){ return []; }),
-      fetch(SB_URL + '/rest/v1/candidate_status_history?select=candidate_id,status,changed_at&order=changed_at.asc', { headers: sbHeaders() }).then(function(r){ return r.ok ? r.json() : []; }).catch(function(){ return []; }),
+      fetch(BACKEND_URL + '/api/positions', { headers: sbHeaders() }).then(function(r){ return r.ok ? r.json() : []; }).catch(function(){ return []; }),
+      fetch(BACKEND_URL + '/api/candidates', { headers: sbHeaders() }).then(function(r){ return r.ok ? r.json() : []; }).catch(function(){ return []; }),
+      fetch(BACKEND_URL + '/api/candidate-status-history', { headers: sbHeaders() }).then(function(r){ return r.ok ? r.json() : []; }).catch(function(){ return []; }),
     ]);
 
     allPositions  = Array.isArray(results[0]) ? results[0] : [];
