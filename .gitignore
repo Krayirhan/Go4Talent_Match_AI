@@ -38,3 +38,13 @@ Thumbs.db
 
 # Misc
 .turbo
+
+# Python ML Service
+ml_service/__pycache__/
+ml_service/app/__pycache__/
+ml_service/.venv/
+ml_service/venv/
+*.pyc
+*.pyo
+*.pyd
+__pycache__/

@@ -94,6 +94,7 @@ const adaylarMarkup = /* html */`
           <input type="file" id="cv-file" accept=".pdf,.doc,.docx" style="display:none" />
         </div>
         <div id="cv-file-name" style="font-size:0.82rem;color:var(--color-accent-500);margin-top:0.4rem;display:none"></div>
+        <div id="cv-ml-status" style="display:none;margin-top:0.4rem;font-size:0.78rem;padding:0.4rem 0.7rem;border-radius:8px;background:rgba(124,92,250,0.08);color:var(--color-accent-500)"></div>
       </div>
       <div class="sett-field">
         <label class="sett-label">Aday Skill'leri</label>
@@ -257,15 +258,12 @@ const adaylarMarkup = /* html */`
   var dropZone = document.getElementById('cv-drop-zone');
   var fileInput = document.getElementById('cv-file');
   dropZone.addEventListener('click', function(){ fileInput.click(); });
-  fileInput.addEventListener('change', function(){
-    if (this.files[0]) { var n = document.getElementById('cv-file-name'); n.textContent = '✓ ' + this.files[0].name; n.style.display='block'; }
-  });
   dropZone.addEventListener('dragover', function(e){ e.preventDefault(); dropZone.style.borderColor='var(--color-primary-500)'; });
   dropZone.addEventListener('dragleave', function(){ dropZone.style.borderColor=''; });
   dropZone.addEventListener('drop', function(e){
     e.preventDefault(); dropZone.style.borderColor='';
     var file = e.dataTransfer.files[0];
-    if (file) { fileInput.files = e.dataTransfer.files; var n=document.getElementById('cv-file-name'); n.textContent='✓ '+file.name; n.style.display='block'; }
+    if (file) { fileInput.files = e.dataTransfer.files; var n=document.getElementById('cv-file-name'); n.textContent='✓ '+file.name; n.style.display='block'; parseCvWithML(file); }
   });
 
   async function uploadCvFile(file, candId) {
@@ -291,6 +289,55 @@ const adaylarMarkup = /* html */`
     }
     return SB_URL + '/storage/v1/object/cvs/' + path;
   }
+
+  // ── CV ML Parse — dosya seçilince otomatik skill doldur ──
+  async function parseCvWithML(file) {
+    var statusEl = document.getElementById('cv-ml-status');
+    if (statusEl) { statusEl.textContent = '🔍 CV analiz ediliyor…'; statusEl.style.display = 'block'; }
+    try {
+      var formData = new FormData();
+      formData.append('file', file);
+      var res = await fetch('http://localhost:5002/api/cv/parse', {
+        method: 'POST',
+        body: formData
+      });
+      if (!res.ok) throw new Error('ML servis hatası');
+      var data = await res.json();
+
+      // Skill'leri forma doldur (mevcut değerleri koru + ekle)
+      if (data.skills && data.skills.length > 0) {
+        var current = document.getElementById('cv-skills').value.trim();
+        var existing = current ? current.split(',').map(function(s){ return s.trim().toLowerCase(); }) : [];
+        var newSkills = data.skills.filter(function(s){ return existing.indexOf(s.toLowerCase()) === -1; });
+        var merged = current ? current + (newSkills.length ? ', ' + newSkills.join(', ') : '') : newSkills.join(', ');
+        document.getElementById('cv-skills').value = merged;
+        updateScorePreview();
+      }
+
+      // ML özet bilgisi göster
+      var parts = [];
+      if (data.experience_years) parts.push(data.experience_years + ' yıl deneyim');
+      if (data.last_role)        parts.push(data.last_role);
+      if (data.education && data.education.degree) parts.push(data.education.degree);
+      if (data.languages && data.languages.length) parts.push(data.languages.join(', '));
+
+      if (statusEl) {
+        statusEl.textContent = '✓ ' + data.skills.length + ' skill tespit edildi' + (parts.length ? ' · ' + parts.join(' · ') : '');
+        statusEl.style.color = 'var(--color-accent-500)';
+      }
+    } catch(e) {
+      if (statusEl) { statusEl.textContent = 'ML servis bağlantısı yok — skill\'leri elle girin.'; statusEl.style.color = 'var(--text-tertiary)'; }
+    }
+  }
+
+  fileInput.addEventListener('change', function() {
+    if (this.files[0]) {
+      var n = document.getElementById('cv-file-name');
+      n.textContent = '✓ ' + this.files[0].name;
+      n.style.display = 'block';
+      parseCvWithML(this.files[0]);
+    }
+  });
 
   // canlı skor önizleme
   function updateScorePreview() {
