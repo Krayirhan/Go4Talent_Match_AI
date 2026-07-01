@@ -191,6 +191,59 @@ const pozisyonDetayMarkup = /* html */`
 
   var currentPos = null;
 
+  function calcScore(candSkills, reqSkills, prefSkills) {
+    var cs = (candSkills || []).map(function(s){ return s.toLowerCase(); });
+    var req  = reqSkills  || [];
+    var pref = prefSkills || [];
+    var reqMatch  = req.length  ? req.filter(function(s){ return cs.indexOf(s.toLowerCase()) > -1; }).length  : 0;
+    var prefMatch = pref.length ? pref.filter(function(s){ return cs.indexOf(s.toLowerCase()) > -1; }).length : 0;
+    var score = Math.round(
+      (req.length  ? (reqMatch  / req.length)  * 70 : 70) +
+      (pref.length ? (prefMatch / pref.length) * 30 : 30)
+    );
+    return Math.max(1, Math.min(100, score));
+  }
+
+  async function recalcCandidateScores(reqSkills, prefSkills) {
+    try {
+      var res = await fetch(SB_URL + '/rest/v1/candidates?position_id=eq.' + posId + '&select=id,skills', { headers: sbHeaders() });
+      if (!res.ok) return;
+      var candidates = await res.json();
+      if (!candidates.length) return;
+      await Promise.all(candidates.map(function(c) {
+        var newScore = calcScore(c.skills, reqSkills, prefSkills);
+        return fetch(SB_URL + '/rest/v1/candidates?id=eq.' + c.id, {
+          method: 'PATCH',
+          headers: sbHeaders(),
+          body: JSON.stringify({ score: newScore })
+        });
+      }));
+      showToast(candidates.length + ' adayın skoru güncellendi.', true);
+      // Tabloyu yenile
+      var tbodyRes = await fetch(SB_URL + '/rest/v1/candidates?position_id=eq.' + posId + '&select=*&order=score.desc', { headers: sbHeaders() });
+      if (!tbodyRes.ok) return;
+      var updatedCands = await tbodyRes.json();
+      var tbody = document.getElementById('pos-cand-tbody');
+      if (!tbody) return;
+      tbody.innerHTML = updatedCands.map(function(c, idx) {
+        var initials = c.name.split(' ').map(function(w){return w[0];}).join('').toUpperCase().slice(0,2);
+        var sc = c.score || 0;
+        var date = new Date(c.created_at).toLocaleDateString('tr-TR',{day:'numeric',month:'short',year:'numeric'});
+        return '<tr>' +
+          '<td><div class="candidate-cell"><div class="cand-avatar" style="background:' + colors[idx%colors.length] + '">' + initials + '</div><div><div class="cand-name">' + c.name + '</div><div class="cand-email">' + c.email + '</div></div></div></td>' +
+          '<td><div class="score-wrap"><div class="score-bar"><div class="score-fill" style="width:' + sc + '%;background:' + scoreColor(sc) + '"></div></div><span class="score-num" style="color:' + scoreColor(sc) + '">' + sc + '</span></div></td>' +
+          '<td><span class="status-badge ' + (statusMap[c.status]||'status-review') + '">' + (statusLabel[c.status]||c.status) + '</span></td>' +
+          '<td class="date-cell">' + date + '</td>' +
+          '<td><button class="row-action-btn" data-href="/adaylar/' + c.id + '">İncele →</button></td>' +
+        '</tr>';
+      }).join('');
+      // İstatistikleri güncelle
+      var avg = updatedCands.length ? Math.round(updatedCands.reduce(function(s,c){return s+(c.score||0);},0)/updatedCands.length) : 0;
+      var avgEl = document.getElementById('ps-avg');
+      if (avgEl) avgEl.textContent = avg || '—';
+    } catch(e) {}
+  }
+
   (async function() {
     var results = await Promise.all([
       fetch(SB_URL + '/rest/v1/positions?id=eq.' + posId + '&select=*', { headers: sbHeaders() }).then(function(r){ return r.json(); }),
@@ -360,7 +413,9 @@ const pozisyonDetayMarkup = /* html */`
         updates.required_skills.forEach(function(s){ var sp=document.createElement('span'); sp.className='skill-chip skill-chip-req'; sp.textContent=s; reqWrap.appendChild(sp); });
         updates.preferred_skills.forEach(function(s){ var sp=document.createElement('span'); sp.className='skill-chip skill-chip-pref'; sp.textContent=s; prefWrap.appendChild(sp); });
         closeEditModal();
-        showToast('Pozisyon güncellendi.', true);
+        showToast('Pozisyon güncellendi. Aday skorları yeniden hesaplanıyor…', true);
+        // Skill değişince adayların skorlarını yeniden hesapla
+        recalcCandidateScores(updates.required_skills, updates.preferred_skills);
       } else {
         showToast('Güncelleme başarısız.', false);
       }

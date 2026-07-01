@@ -37,9 +37,15 @@ const adayDetayMarkup = /* html */`
               <span id="detay-status-badge" class="status-badge"></span>
             </div>
           </div>
-          <div style="text-align:center;flex-shrink:0">
-            <div id="detay-score" style="font-family:var(--font-heading);font-size:2.5rem;font-weight:700;color:var(--color-accent-500)"></div>
-            <div style="font-size:0.72rem;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.07em">Eşleşme Skoru</div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:0.75rem;flex-shrink:0">
+            <div style="text-align:center">
+              <div id="detay-score" style="font-family:var(--font-heading);font-size:2.5rem;font-weight:700;color:var(--color-accent-500)"></div>
+              <div style="font-size:0.72rem;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.07em">Eşleşme Skoru</div>
+            </div>
+            <a id="cv-indir-btn" href="#" target="_blank" rel="noopener" style="display:none;align-items:center;gap:0.4rem;padding:0.45rem 0.9rem;border-radius:8px;font-size:0.78rem;font-weight:600;border:1px solid rgba(194,245,66,0.3);color:#c2f542;background:rgba(194,245,66,0.07);text-decoration:none">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              CV İndir
+            </a>
           </div>
         </div>
 
@@ -169,6 +175,13 @@ const adayDetayMarkup = /* html */`
     document.getElementById('detay-score').textContent = cand.score || 0;
     updateStatusBadge(cand.status);
     document.getElementById('detay-notes').value = cand.notes || '';
+
+    // CV indirme butonu
+    if (cand.cv_url) {
+      var cvBtn = document.getElementById('cv-indir-btn');
+      cvBtn.href = cand.cv_url;
+      cvBtn.style.display = 'flex';
+    }
 
     // skill breakdown
     var pos = await fetchPosition(cand.position_id);
