@@ -2,6 +2,8 @@
 Go4Talent ML Service — Port 5002
 FastAPI tabanlı CV analiz ve skill eşleştirme servisi.
 """
+from __future__ import annotations
+from typing import List, Optional
 import httpx
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -29,7 +31,7 @@ def health():
 # ── CV Parse — dosya upload ──
 @app.post("/api/cv/parse")
 async def parse_cv(file: UploadFile = File(...)):
-    allowed = {".pdf", ".doc", ".docx"}
+    allowed = {".pdf", ".doc", ".docx", ".txt"}
     import os
     ext = os.path.splitext(file.filename or "")[1].lower()
     if ext not in allowed:
@@ -63,9 +65,9 @@ async def parse_cv_from_url(req: ParseUrlRequest):
 
 # ── Match Score ──
 class MatchRequest(BaseModel):
-    candidate_skills: list[str]
-    required_skills:  list[str]
-    preferred_skills: list[str] = []
+    candidate_skills: List[str]
+    required_skills:  List[str]
+    preferred_skills: List[str] = []
 
 @app.post("/api/match-score")
 def match_score(req: MatchRequest):

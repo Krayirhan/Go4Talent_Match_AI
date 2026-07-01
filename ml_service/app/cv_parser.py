@@ -1,7 +1,8 @@
+from __future__ import annotations
 import re
 import io
 from pathlib import Path
-from typing import Optional
+from typing import Optional, List, Dict
 
 import pdfplumber
 from docx import Document
@@ -39,18 +40,28 @@ LANG_KEYWORDS = {
 
 
 def extract_text_from_pdf(data: bytes) -> str:
-    text_parts = []
-    with pdfplumber.open(io.BytesIO(data)) as pdf:
-        for page in pdf.pages:
-            t = page.extract_text()
-            if t:
-                text_parts.append(t)
-    return "\n".join(text_parts)
+    try:
+        text_parts = []
+        with pdfplumber.open(io.BytesIO(data)) as pdf:
+            for page in pdf.pages:
+                t = page.extract_text()
+                if t:
+                    text_parts.append(t)
+        result = "\n".join(text_parts)
+        if result.strip():
+            return result
+    except Exception:
+        pass
+    # Fallback: belki PDF değil, düz metin
+    return data.decode("utf-8", errors="ignore")
 
 
 def extract_text_from_docx(data: bytes) -> str:
-    doc = Document(io.BytesIO(data))
-    return "\n".join(p.text for p in doc.paragraphs if p.text.strip())
+    try:
+        doc = Document(io.BytesIO(data))
+        return "\n".join(p.text for p in doc.paragraphs if p.text.strip())
+    except Exception:
+        return data.decode("utf-8", errors="ignore")
 
 
 def extract_text(data: bytes, filename: str) -> str:
@@ -62,7 +73,7 @@ def extract_text(data: bytes, filename: str) -> str:
     return data.decode("utf-8", errors="ignore")
 
 
-def extract_skills(text: str) -> list[str]:
+def extract_skills(text: str) -> List[str]:
     text_lower = text.lower()
     found: set[str] = set()
 
@@ -127,7 +138,7 @@ def extract_education(text: str) -> Optional[dict]:
     return {"degree": detected_degree, "university": university}
 
 
-def extract_languages(text: str) -> list[str]:
+def extract_languages(text: str) -> List[str]:
     text_lower = text.lower()
     found = []
     for lang, keywords in LANG_KEYWORDS.items():

@@ -3,6 +3,8 @@ Pozisyon–Aday eşleştirme skoru.
 Mevcut Node.js backend'deki basit string karşılaştırmasının yerini alır.
 Fuzzy + alias + semantic ağırlıklandırma kullanır.
 """
+from __future__ import annotations
+from typing import List, Dict
 from rapidfuzz import fuzz
 from .skill_taxonomy import ALIAS_MAP
 
@@ -13,7 +15,7 @@ def normalize_skill(skill: str) -> str:
     return ALIAS_MAP.get(key, skill)
 
 
-def skill_match_score(candidate_skills: list[str], required: list[str], preferred: list[str]) -> dict:
+def skill_match_score(candidate_skills: List[str], required: List[str], preferred: List[str]) -> Dict:
     if not candidate_skills:
         return {"total": 1, "req_match": 0, "pref_match": 0, "matched_req": [], "matched_pref": [], "missing_req": required}
 
