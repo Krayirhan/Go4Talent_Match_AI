@@ -262,13 +262,13 @@ const raporlarMarkup = /* html */`
 
   (async function () {
     var results = await Promise.all([
-      fetch(SB_URL + '/rest/v1/positions?select=*', { headers: sbHeaders() }).then(function(r){ return r.json(); }).catch(function(){ return []; }),
-      fetch(SB_URL + '/rest/v1/candidates?select=*', { headers: sbHeaders() }).then(function(r){ return r.json(); }).catch(function(){ return []; }),
+      fetch(SB_URL + '/rest/v1/positions?select=*', { headers: sbHeaders() }).then(function(r){ return r.ok ? r.json() : []; }).catch(function(){ return []; }),
+      fetch(SB_URL + '/rest/v1/candidates?select=*', { headers: sbHeaders() }).then(function(r){ return r.ok ? r.json() : []; }).catch(function(){ return []; }),
       fetch(SB_URL + '/rest/v1/candidate_status_history?select=candidate_id,status,changed_at&order=changed_at.asc', { headers: sbHeaders() }).then(function(r){ return r.ok ? r.json() : []; }).catch(function(){ return []; }),
     ]);
 
-    allPositions  = results[0];
-    allCandidates = results[1];
+    allPositions  = Array.isArray(results[0]) ? results[0] : [];
+    allCandidates = Array.isArray(results[1]) ? results[1] : [];
     allHistory    = results[2];
 
     document.getElementById('rap-loading').style.display = 'none';

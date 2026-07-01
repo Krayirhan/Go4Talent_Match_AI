@@ -246,14 +246,15 @@ const pozisyonDetayMarkup = /* html */`
 
   (async function() {
     var results = await Promise.all([
-      fetch(SB_URL + '/rest/v1/positions?id=eq.' + posId + '&select=*', { headers: sbHeaders() }).then(function(r){ return r.json(); }),
-      fetch(SB_URL + '/rest/v1/candidates?position_id=eq.' + posId + '&select=*&order=score.desc', { headers: sbHeaders() }).then(function(r){ return r.json(); }),
+      fetch(SB_URL + '/rest/v1/positions?id=eq.' + posId + '&select=*', { headers: sbHeaders() }).then(function(r){ return r.ok ? r.json() : []; }).catch(function(){ return []; }),
+      fetch(SB_URL + '/rest/v1/candidates?position_id=eq.' + posId + '&select=*&order=score.desc', { headers: sbHeaders() }).then(function(r){ return r.ok ? r.json() : []; }).catch(function(){ return []; }),
     ]);
 
     document.getElementById('pos-loading').style.display = 'none';
 
-    var pos  = results[0][0];
-    var cands = results[1] || [];
+    var r0   = Array.isArray(results[0]) ? results[0] : [];
+    var pos  = r0[0];
+    var cands = Array.isArray(results[1]) ? results[1] : [];
 
     if (!pos) { document.getElementById('pos-notfound').style.display = 'block'; return; }
     currentPos = pos;

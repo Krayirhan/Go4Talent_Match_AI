@@ -139,14 +139,14 @@ const dashboardMarkup = /* html */`
 
   (async function() {
     var results = await Promise.all([
-      fetch(SB_URL + '/rest/v1/positions?select=id,status', { headers: sbHeaders() }).then(function(r){ return r.json(); }).catch(function(){ return []; }),
-      fetch(SB_URL + '/rest/v1/candidates?select=*&order=created_at.desc&limit=5', { headers: sbHeaders() }).then(function(r){ return r.json(); }).catch(function(){ return []; }),
-      fetch(SB_URL + '/rest/v1/candidates?select=id,score', { headers: sbHeaders() }).then(function(r){ return r.json(); }).catch(function(){ return []; }),
+      fetch(SB_URL + '/rest/v1/positions?select=id,status', { headers: sbHeaders() }).then(function(r){ return r.ok ? r.json() : []; }).catch(function(){ return []; }),
+      fetch(SB_URL + '/rest/v1/candidates?select=*&order=created_at.desc&limit=5', { headers: sbHeaders() }).then(function(r){ return r.ok ? r.json() : []; }).catch(function(){ return []; }),
+      fetch(SB_URL + '/rest/v1/candidates?select=id,score', { headers: sbHeaders() }).then(function(r){ return r.ok ? r.json() : []; }).catch(function(){ return []; }),
     ]);
 
-    var positions  = results[0];
-    var recent     = results[1];
-    var allCands   = results[2];
+    var positions  = Array.isArray(results[0]) ? results[0] : [];
+    var recent     = Array.isArray(results[1]) ? results[1] : [];
+    var allCands   = Array.isArray(results[2]) ? results[2] : [];
 
     var aktif   = positions.filter(function(p){ return p.status === 'aktif'; }).length;
     var toplam  = allCands.length;
