@@ -1,0 +1,16 @@
+{
+  "name": "go4talent-backend",
+  "version": "1.0.0",
+  "description": "Go4Talent MatchAI Backend - Fastify API",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "node --watch src/index.js",
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "@fastify/cors": "^9.0.1",
+    "fastify": "^4.28.1",
+    "dotenv": "^16.4.5",
+    "@supabase/supabase-js": "^2.45.4"
+  }
+}

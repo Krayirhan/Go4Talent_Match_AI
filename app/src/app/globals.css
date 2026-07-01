@@ -1,0 +1,61 @@
+@import "tailwindcss";
+
+:root {
+  --color-neutral-950: #0c0a14;
+  --color-neutral-900: #15101f;
+  --color-neutral-850: #1b1428;
+  --color-neutral-800: #241b34;
+  --color-neutral-700: #362a4c;
+  --color-neutral-500: #7c7191;
+  --color-neutral-300: #b6abc9;
+  --color-neutral-100: #ece6f5;
+
+  --color-primary-700: #4530c2;
+  --color-primary-600: #5b3fe0;
+  --color-primary-500: #7c5cfa;
+  --color-primary-400: #a48bff;
+
+  --color-accent-500: #c2f542;
+  --color-accent-600: #9bd400;
+
+  --color-signal-risk-500: #fb6f92;
+
+  --surface-base: var(--color-neutral-950);
+  --surface-card: var(--color-neutral-900);
+  --surface-overlay: rgba(255, 255, 255, 0.03);
+  --surface-stroke: rgba(255, 255, 255, 0.08);
+
+  --text-primary: #f6f3fb;
+  --text-secondary: #c2b8d4;
+  --text-tertiary: #8e81a4;
+  --text-on-primary: #15101f;
+
+  --gradient-accent: linear-gradient(135deg, var(--color-primary-500) 0%, var(--color-primary-700) 100%);
+
+  --font-heading: "Space Grotesk", sans-serif;
+  --font-body: "Manrope", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--surface-base);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  line-height: 1.6;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(circle at 50% 20%, black, transparent 75%);
+  -webkit-mask-image: radial-gradient(circle at 50% 20%, black, transparent 75%);
+}

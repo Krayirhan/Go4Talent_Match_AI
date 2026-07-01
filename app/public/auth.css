@@ -1,0 +1,267 @@
+/* ── Auth Pages – Go4Talent MatchAI ───────────────────────────────────── */
+
+:root {
+  --color-primary-500: #7c5cfa;
+  --color-primary-700: #4530c2;
+  --color-primary-400: #a48bff;
+  --color-accent-500:  #c2f542;
+  --surface-base:      #0c0a14;
+  --surface-card:      #15101f;
+  --surface-stroke:    rgba(255,255,255,0.08);
+  --text-primary:      #f6f3fb;
+  --text-secondary:    #c2b8d4;
+  --text-tertiary:     #7a6f90;
+  --text-on-primary:   #0c0a14;
+  --gradient-accent:   linear-gradient(135deg, #7c5cfa 0%, #4530c2 100%);
+  --font-heading: "Space Grotesk", sans-serif;
+  --font-body:    "Manrope", sans-serif;
+  --radius-card:  28px;
+  --radius-input: 14px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  min-height: 100%;
+  background-color: var(--surface-base);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* grid dot background */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(124,92,250,0.12) 1px, transparent 1px);
+  background-size: 28px 28px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Layout ─────────────────────────────────────────────────────────────── */
+.auth-root {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 1rem;
+}
+
+.auth-wrapper {
+  width: 100%;
+  max-width: 440px;
+}
+
+/* ── Logo ───────────────────────────────────────────────────────────────── */
+.auth-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+  margin-bottom: 2rem;
+}
+
+.auth-logo-mark {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  clip-path: polygon(0 0, 100% 0, 100% 70%, 70% 100%, 0 100%);
+  background: linear-gradient(135deg, #7c5cfa 0%, #7c5cfa 55%, #c2f542 100%);
+  color: #0c0a14;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.auth-logo-name {
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+/* ── Card ───────────────────────────────────────────────────────────────── */
+.auth-card {
+  background: var(--surface-card);
+  border: 1px solid var(--surface-stroke);
+  border-radius: var(--radius-card);
+  padding: 2.25rem 2rem;
+}
+
+.auth-eyebrow {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-accent-500);
+  margin-bottom: 0.6rem;
+}
+
+.auth-title {
+  font-family: var(--font-heading);
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin-bottom: 0.4rem;
+}
+
+.auth-subtitle {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  margin-bottom: 1.75rem;
+}
+
+/* ── Form ───────────────────────────────────────────────────────────────── */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.form-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+.form-input {
+  width: 100%;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--surface-stroke);
+  border-radius: var(--radius-input);
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  font-family: var(--font-body);
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.form-input:focus {
+  border-color: var(--color-primary-500);
+  box-shadow: 0 0 0 3px rgba(124,92,250,0.18);
+}
+
+/* ── Row (beni hatırla + şifremi unuttum) ───────────────────────────────── */
+.auth-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.85rem;
+}
+
+.auth-check-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.auth-check-label input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 1px solid var(--surface-stroke);
+  accent-color: var(--color-primary-500);
+  cursor: pointer;
+}
+
+.auth-link {
+  color: var(--color-primary-400);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.auth-link:hover {
+  text-decoration: underline;
+}
+
+/* ── KVKK checkbox row ──────────────────────────────────────────────────── */
+.auth-kvkk {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.auth-kvkk input[type="checkbox"] {
+  margin-top: 2px;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  accent-color: var(--color-primary-500);
+}
+
+/* ── Submit button ──────────────────────────────────────────────────────── */
+.auth-btn {
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 48px;
+  border: none;
+  border-radius: 999px;
+  background: var(--gradient-accent);
+  color: var(--text-on-primary);
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.auth-btn:hover {
+  transform: translateY(-2px);
+}
+
+.auth-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ── Footer text ────────────────────────────────────────────────────────── */
+.auth-footer {
+  margin-top: 1.25rem;
+  text-align: center;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+}
+
+@media (max-width: 480px) {
+  .auth-card {
+    padding: 1.75rem 1.25rem;
+    border-radius: 20px;
+  }
+
+  .auth-title {
+    font-size: 1.35rem;
+  }
+}
