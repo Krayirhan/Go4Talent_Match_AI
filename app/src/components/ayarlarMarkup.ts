@@ -329,6 +329,8 @@ const ayarlarMarkup = /* html */`
 <script>
 (function () {
   ${sbHelpers}
+  var SB_URL = '${SB_URL}';
+  var SB_KEY = '${SB_KEY}';
 
   // ── Tabs ──
   var tabs = document.querySelectorAll('.settings-tab');

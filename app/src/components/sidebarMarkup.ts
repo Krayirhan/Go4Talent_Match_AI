@@ -1,3 +1,5 @@
+import { SB_URL, SB_KEY, BACKEND_URL } from '../lib/supabaseConfig';
+
 export function sidebar(active: 'dashboard' | 'adaylar' | 'pozisyonlar' | 'raporlar' | 'ayarlar' | 'mulakat'): string {
   const link = (id: string, href: string, icon: string, label: string) => `
     <a href="${href}" class="dash-nav-link${active === id ? ' active' : ''}">
@@ -68,8 +70,9 @@ export function sidebar(active: 'dashboard' | 'adaylar' | 'pozisyonlar' | 'rapor
 export const sidebarScript = `
 <script>
 (function () {
-  var SB_URL = 'https://vewfghckacbdgacpnqef.supabase.co';
-  var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZld2ZnaGNrYWNiZGdhY3BucWVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4NDUwNTcsImV4cCI6MjA5ODQyMTA1N30.FqXZJibHciSDwi3w1RDSEZK3GJNyZ1u7vQXXdvsNc6w';
+  var SB_URL = '${SB_URL}';
+  var SB_KEY = '${SB_KEY}';
+  var BACKEND_URL = '${BACKEND_URL}';
 
   // ── Session kontrolü ──
   var email = '';
@@ -155,7 +158,7 @@ export const sidebarScript = `
     async function loadNotifications() {
       try {
         var token = localStorage.getItem('sb_access_token') || SB_KEY;
-        var res = await fetch(SB_URL + '/rest/v1/notifications?read=eq.false&order=created_at.desc&limit=10', {
+        var res = await fetch(BACKEND_URL + '/api/notifications', {
           headers: { apikey: SB_KEY, Authorization: 'Bearer ' + token }
         });
         var notifs = await res.json();
@@ -178,10 +181,9 @@ export const sidebarScript = `
           dropdown.querySelectorAll('.notif-item').forEach(function(el) {
             el.addEventListener('click', async function() {
               var id = el.dataset.id;
-              await fetch(SB_URL + '/rest/v1/notifications?id=eq.' + id, {
+              await fetch(BACKEND_URL + '/api/notifications/' + id + '/read', {
                 method: 'PATCH',
-                headers: { apikey: SB_KEY, Authorization: 'Bearer ' + (localStorage.getItem('sb_access_token')||SB_KEY), 'Content-Type': 'application/json' },
-                body: JSON.stringify({ read: true })
+                headers: { apikey: SB_KEY, Authorization: 'Bearer ' + (localStorage.getItem('sb_access_token')||SB_KEY), 'Content-Type': 'application/json' }
               });
               loadNotifications();
             });

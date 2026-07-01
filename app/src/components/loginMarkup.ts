@@ -36,6 +36,7 @@ const loginMarkup = /* html */`
             Beni hatırla
           </label>
           <a href="#" class="auth-link">Şifremi unuttum</a>
+                  <button type="button" class="auth-link" id="forgot-password-btn" style="background:none;border:0;padding:0;cursor:pointer">Şifremi unuttum</button>
         </div>
 
         <button type="submit" class="auth-btn" id="login-btn">Giriş Yap</button>
@@ -66,9 +67,39 @@ const loginMarkup = /* html */`
   var form = document.getElementById('login-form');
   var btn  = document.getElementById('login-btn');
   var errBox = document.getElementById('auth-error');
+  var forgotBtn = document.getElementById('forgot-password-btn');
 
   function showError(msg) { errBox.textContent = msg; errBox.style.display = 'block'; }
   function hideError() { errBox.style.display = 'none'; }
+
+  if (forgotBtn) forgotBtn.addEventListener('click', async function() {
+    var email = document.getElementById('email').value.trim();
+    if (!email) {
+      showError('Lütfen önce e-posta adresinizi girin.');
+      return;
+    }
+
+    hideError();
+    forgotBtn.disabled = true;
+    forgotBtn.textContent = 'Gönderiliyor…';
+    try {
+      var res = await fetch(SB_URL + '/auth/v1/recover', {
+        method: 'POST',
+        headers: { 'apikey': SB_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email, redirect_to: window.location.origin + '/login' })
+      });
+      if (res.ok) {
+        showError('Şifre sıfırlama bağlantısı e-posta adresinize gönderildi.');
+      } else {
+        var data = await res.json().catch(function(){ return {}; });
+        showError(data.error_description || data.msg || 'Şifre sıfırlama isteği gönderilemedi.');
+      }
+    } catch (e) {
+      showError('Bağlantı hatası. Lütfen tekrar deneyin.');
+    }
+    forgotBtn.disabled = false;
+    forgotBtn.textContent = 'Şifremi unuttum';
+  });
 
   form.addEventListener('submit', async function (e) {
     e.preventDefault();

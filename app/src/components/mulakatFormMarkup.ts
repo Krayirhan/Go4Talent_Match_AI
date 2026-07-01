@@ -1,4 +1,4 @@
-import { SB_URL, SB_KEY, sbHelpers } from '../lib/supabaseConfig';
+import { SB_URL, SB_KEY, BACKEND_URL } from '../lib/supabaseConfig';
 
 const mulakatFormMarkup = /* html */`
 <!DOCTYPE html>
@@ -48,6 +48,7 @@ const mulakatFormMarkup = /* html */`
 (function() {
   var SB_URL = '${SB_URL}';
   var SB_KEY = '${SB_KEY}';
+  var BACKEND_URL = '${BACKEND_URL}';
 
   var candId = window.location.pathname.split('/').pop();
   var typeMap = { open: 'textarea', yesno: 'yesno', scale: 'scale', text: 'text' };
@@ -129,15 +130,14 @@ const mulakatFormMarkup = /* html */`
         }
       });
 
-      // Önce backend'e dene, hata alırsa doğrudan Supabase'e yaz
       var submitted = false;
       try {
-        var backendRes = await fetch('http://localhost:5001/api/interview/' + candId + '/submit', {
+        var backendRes = await fetch(BACKEND_URL + '/api/interview/' + candId + '/submit', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ answers: answers })
         });
-        if (backendRes.ok) submitted = true;
+        submitted = backendRes.ok;
       } catch(e) {}
 
       if (!submitted) {
@@ -161,7 +161,6 @@ const mulakatFormMarkup = /* html */`
         }
       }
 
-      var res = { ok: submitted };
       if (submitted) {
         document.getElementById('form-wrap').style.display = 'none';
         document.getElementById('form-done').style.display = 'block';

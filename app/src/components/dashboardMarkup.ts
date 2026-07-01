@@ -1,5 +1,5 @@
 import { sidebar, sidebarScript } from './sidebarMarkup';
-import { SB_URL, SB_KEY, sbHelpers } from '../lib/supabaseConfig';
+import { sbHelpers, BACKEND_URL } from '../lib/supabaseConfig';
 
 const dashboardMarkup = /* html */`
 <div class="dash-shell">
@@ -131,22 +131,30 @@ const dashboardMarkup = /* html */`
 <script>
 (function () {
   ${sbHelpers}
+  var BACKEND_URL = '${BACKEND_URL}';
 
   var colors = ['linear-gradient(135deg,#7c5cfa,#4530c2)','linear-gradient(135deg,#5cb8fa,#2980c2)','linear-gradient(135deg,#fa5cc8,#c23080)','linear-gradient(135deg,#fa8c5c,#c25030)','linear-gradient(135deg,#5cfaaa,#20c280)'];
   var statusMap = { inceleniyor:'status-review', mulakat:'status-interview', teklif:'status-offer', reddedildi:'status-rejected' };
   var statusLabel = { inceleniyor:'İnceleniyor', mulakat:'Mülakat', teklif:'Teklif', reddedildi:'Reddedildi' };
+  function formatDuration(ms) {
+    if (!ms || ms <= 0) return '—';
+    var hours = Math.round(ms / (1000 * 60 * 60));
+    if (hours < 24) return hours + ' sa';
+    return Math.round(hours / 24) + ' gün';
+  }
   var scoreColor = function(s){ return s >= 80 ? 'var(--color-accent-500)' : s >= 60 ? '#fac85c' : '#7a6f90'; };
 
   (async function() {
     var results = await Promise.all([
-      fetch(SB_URL + '/rest/v1/positions?select=id,status', { headers: sbHeaders() }).then(function(r){ return r.ok ? r.json() : []; }).catch(function(){ return []; }),
-      fetch(SB_URL + '/rest/v1/candidates?select=*&order=created_at.desc&limit=5', { headers: sbHeaders() }).then(function(r){ return r.ok ? r.json() : []; }).catch(function(){ return []; }),
-      fetch(SB_URL + '/rest/v1/candidates?select=id,score', { headers: sbHeaders() }).then(function(r){ return r.ok ? r.json() : []; }).catch(function(){ return []; }),
+      fetch(BACKEND_URL + '/api/positions', { headers: sbHeaders() }).then(function(r){ return r.ok ? r.json() : []; }).catch(function(){ return []; }),
+      fetch(BACKEND_URL + '/api/candidates', { headers: sbHeaders() }).then(function(r){ return r.ok ? r.json() : []; }).catch(function(){ return []; }),
+      fetch(BACKEND_URL + '/api/candidate-status-history', { headers: sbHeaders() }).then(function(r){ return r.ok ? r.json() : []; }).catch(function(){ return []; }),
     ]);
 
     var positions  = Array.isArray(results[0]) ? results[0] : [];
-    var recent     = Array.isArray(results[1]) ? results[1] : [];
-    var allCands   = Array.isArray(results[2]) ? results[2] : [];
+    var recent     = Array.isArray(results[1]) ? results[1].slice(0, 5) : [];
+    var allCands   = Array.isArray(results[1]) ? results[1] : [];
+    var history    = Array.isArray(results[2]) ? results[2] : [];
 
     var aktif   = positions.filter(function(p){ return p.status === 'aktif'; }).length;
     var toplam  = allCands.length;
@@ -158,6 +166,28 @@ const dashboardMarkup = /* html */`
     document.getElementById('delta-aktif').textContent   = aktif   ? aktif + ' açık pozisyon'   : 'İlk pozisyonu aç →';
     document.getElementById('delta-toplam').textContent  = toplam  ? toplam + ' aday kayıtlı'    : 'CV yükleyerek başla →';
     document.getElementById('delta-eslesen').textContent = eslesen ? eslesen + ' uyumlu aday'    : 'Eşleştirme bekleniyor';
+
+    var decisionDurations = [];
+    var firstHistoryByCandidate = {};
+    history.forEach(function(item) {
+      if (!item || !item.candidate_id || !item.changed_at) return;
+      if (!firstHistoryByCandidate[item.candidate_id]) firstHistoryByCandidate[item.candidate_id] = item;
+    });
+    allCands.forEach(function(c) {
+      var firstChange = firstHistoryByCandidate[c.id];
+      if (!firstChange || !c.created_at) return;
+      var startAt = new Date(c.created_at).getTime();
+      var endAt = new Date(firstChange.changed_at).getTime();
+      if (endAt > startAt) decisionDurations.push(endAt - startAt);
+    });
+    var avgDecision = decisionDurations.length ? Math.round(decisionDurations.reduce(function(sum, value){ return sum + value; }, 0) / decisionDurations.length) : 0;
+    var decisionCard = document.querySelector('.dash-stat-card[data-color="pink"]');
+    if (decisionCard) {
+      var valueEl = decisionCard.querySelector('.dash-stat-value');
+      var deltaEl = decisionCard.querySelector('.dash-stat-delta');
+      if (valueEl) valueEl.textContent = avgDecision ? formatDuration(avgDecision) : '—';
+      if (deltaEl) deltaEl.textContent = avgDecision ? decisionDurations.length + ' aday üzerinden hesaplandı' : 'Karar geçmişi oluşunca görünür';
+    }
 
     var tbody = document.getElementById('recent-tbody');
     if (!tbody) return;

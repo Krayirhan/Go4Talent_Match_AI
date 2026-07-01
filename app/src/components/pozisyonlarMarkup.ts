@@ -1,5 +1,5 @@
 import { sidebar, sidebarScript } from './sidebarMarkup';
-import { SB_URL, SB_KEY, sbHelpers } from '../lib/supabaseConfig';
+import { SB_URL, SB_KEY, sbHelpers, BACKEND_URL } from '../lib/supabaseConfig';
 
 const pozisyonlarMarkup = /* html */`
 <div class="dash-shell">
@@ -110,11 +110,20 @@ const pozisyonlarMarkup = /* html */`
 <script>
 (function () {
   ${sbHelpers}
+  var SB_URL = '${SB_URL}';
+  var SB_KEY = '${SB_KEY}';
+  var BACKEND_URL = '${BACKEND_URL}';
 
   var allPositions = [];
 
   async function fetchPositions() {
-    var res = await fetch(SB_URL + '/rest/v1/positions?select=*,candidates(id)&order=created_at.desc', { headers: sbHeaders() });
+    var res = await fetch(BACKEND_URL + '/api/positions', { headers: sbHeaders() });
+    if (!res.ok) return [];
+    return await res.json();
+  }
+
+  async function fetchCandidates() {
+    var res = await fetch(BACKEND_URL + '/api/candidates', { headers: sbHeaders() });
     if (!res.ok) return [];
     return await res.json();
   }
@@ -149,14 +158,16 @@ const pozisyonlarMarkup = /* html */`
     return { bg:'rgba(124,92,250,0.15)', color:'#a48bff' };
   }
 
-  function renderPositions(filter, search) {
+  function renderPositions(filter, search, candidates) {
     var loading = document.getElementById('pos-loading');
     var grid = document.getElementById('pos-grid');
     var empty = document.getElementById('pos-empty');
     if (!grid) return;
 
     var filtered = allPositions.filter(function(p) {
-      var matchStatus = !filter || p.status === filter;
+      var normalizedStatus = p.status === 'pasif' ? 'kapali' : p.status;
+      var requestedStatus = filter === 'pasif' ? 'kapali' : filter;
+      var matchStatus = !requestedStatus || normalizedStatus === requestedStatus;
       var matchSearch = !search || p.title.toLowerCase().includes(search.toLowerCase()) || (p.dept||'').toLowerCase().includes(search.toLowerCase());
       return matchStatus && matchSearch;
     });
@@ -174,10 +185,10 @@ const pozisyonlarMarkup = /* html */`
 
     grid.innerHTML = filtered.map(function(p) {
       var c = colorForDept(p.dept);
-      var isClosed = p.status === 'kapali';
+      var isClosed = p.status === 'kapali' || p.status === 'pasif';
       var badgeClass = isClosed ? 'status-closed' : 'status-active';
       var badgeText = isClosed ? 'Kapalı' : 'Aktif';
-      var candCount = (p.candidates || []).length;
+      var candCount = (candidates || []).filter(function(c){ return c.position_id === p.id; }).length;
       var reqChips = (p.required_skills||[]).slice(0,4).map(function(s){ return '<span class="skill-chip skill-chip-req">'+s+'</span>'; }).join('');
       var prefChips = (p.preferred_skills||[]).slice(0,2).map(function(s){ return '<span class="skill-chip skill-chip-pref">'+s+'</span>'; }).join('');
       return '<div class="pos-card' + (isClosed ? ' pos-card-closed' : '') + '">' +
@@ -263,8 +274,9 @@ const pozisyonlarMarkup = /* html */`
 
   // ── İlk yükleme ──
   (async function() {
-    allPositions = await fetchPositions();
-    renderPositions('', '');
+    var results = await Promise.all([fetchPositions(), fetchCandidates()]);
+    allPositions = results[0];
+    renderPositions('', '', results[1]);
   })();
 })();
 </script>

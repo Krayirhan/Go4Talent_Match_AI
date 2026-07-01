@@ -1,5 +1,5 @@
 ﻿import { sidebar, sidebarScript } from './sidebarMarkup';
-import { SB_URL, SB_KEY, sbHelpers } from '../lib/supabaseConfig';
+import { SB_URL, SB_KEY, sbHelpers, BACKEND_URL, ML_URL } from '../lib/supabaseConfig';
 
 const adaylarMarkup = /* html */`
 <div class="dash-shell">
@@ -116,6 +116,10 @@ const adaylarMarkup = /* html */`
 <script>
 (function () {
   ${sbHelpers}
+  var SB_URL = '${SB_URL}';
+  var SB_KEY = '${SB_KEY}';
+  var BACKEND_URL = '${BACKEND_URL}';
+  var ML_URL = '${ML_URL}';
 
   var allCandidates = [];
   var allPositions = [];
@@ -127,13 +131,33 @@ const adaylarMarkup = /* html */`
   var colors = ['linear-gradient(135deg,#7c5cfa,#4530c2)','linear-gradient(135deg,#5cb8fa,#2980c2)','linear-gradient(135deg,#fa5cc8,#c23080)','linear-gradient(135deg,#fa8c5c,#c25030)','linear-gradient(135deg,#5cfaaa,#20c280)'];
 
   async function fetchCandidates() {
-    var res = await fetch(SB_URL + '/rest/v1/candidates?select=*&order=created_at.desc', { headers: sbHeaders() });
+    var res = await fetch(BACKEND_URL + '/api/candidates', { headers: sbHeaders() });
     return res.ok ? await res.json() : [];
   }
 
   async function fetchPositions() {
-    var res = await fetch(SB_URL + '/rest/v1/positions?select=id,title,required_skills,preferred_skills&order=created_at.desc', { headers: sbHeaders() });
+    var res = await fetch(BACKEND_URL + '/api/positions', { headers: sbHeaders() });
     return res.ok ? await res.json() : [];
+  }
+
+  async function fetchMatchScore(candidateSkills, pos) {
+    try {
+      var res = await fetch(BACKEND_URL + '/api/match-score', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          candidateSkills: candidateSkills || [],
+          requiredSkills: (pos && pos.required_skills) || [],
+          preferredSkills: (pos && pos.preferred_skills) || []
+        })
+      });
+      if (res.ok) {
+        var data = await res.json();
+        if (typeof data.score === 'number') return data.score;
+        if (typeof data.total === 'number') return data.total;
+      }
+    } catch(e) {}
+    return calcScore(candidateSkills, pos);
   }
 
   async function insertCandidate(cand) {
@@ -297,7 +321,7 @@ const adaylarMarkup = /* html */`
     try {
       var formData = new FormData();
       formData.append('file', file);
-      var res = await fetch('http://localhost:5002/api/cv/parse', {
+      var res = await fetch(ML_URL + '/api/cv/parse', {
         method: 'POST',
         body: formData
       });
@@ -326,7 +350,7 @@ const adaylarMarkup = /* html */`
         statusEl.style.color = 'var(--color-accent-500)';
       }
     } catch(e) {
-      if (statusEl) { statusEl.textContent = 'ML servis bağlantısı yok — skill\'leri elle girin.'; statusEl.style.color = 'var(--text-tertiary)'; }
+      if (statusEl) { statusEl.textContent = 'ML servis baglantisi yok — skilleri elle girin.'; statusEl.style.color = 'var(--text-tertiary)'; }
     }
   }
 
@@ -340,7 +364,7 @@ const adaylarMarkup = /* html */`
   });
 
   // canlı skor önizleme
-  function updateScorePreview() {
+  async function updateScorePreview() {
     var posId = document.getElementById('cv-pos-select').value;
     var skillStr = document.getElementById('cv-skills').value;
     var preview = document.getElementById('cv-score-preview');
@@ -348,7 +372,7 @@ const adaylarMarkup = /* html */`
     var pos = allPositions.find(function(p){ return p.id === posId; });
     if (!pos) { preview.style.display='none'; return; }
     var skills = parseSkills(skillStr);
-    var score = calcScore(skills, pos);
+    var score = await fetchMatchScore(skills, pos);
     var req = (pos.required_skills||[]).map(function(s){ return s.toLowerCase(); });
     var pref = (pos.preferred_skills||[]).map(function(s){ return s.toLowerCase(); });
     var reqHit = req.filter(function(s){ return skills.indexOf(s) > -1; }).length;

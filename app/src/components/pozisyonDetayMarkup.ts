@@ -1,5 +1,5 @@
 import { sidebar, sidebarScript } from './sidebarMarkup';
-import { SB_URL, SB_KEY, sbHelpers } from '../lib/supabaseConfig';
+import { SB_URL, SB_KEY, sbHelpers, BACKEND_URL } from '../lib/supabaseConfig';
 
 const pozisyonDetayMarkup = /* html */`
 <div class="dash-shell">
@@ -182,6 +182,9 @@ const pozisyonDetayMarkup = /* html */`
 <script>
 (function () {
   ${sbHelpers}
+  var SB_URL = '${SB_URL}';
+  var SB_KEY = '${SB_KEY}';
+  var BACKEND_URL = '${BACKEND_URL}';
 
   var posId = window.location.pathname.split('/').pop();
   var statusMap   = { inceleniyor:'status-review', mulakat:'status-interview', teklif:'status-offer', reddedildi:'status-rejected' };
@@ -206,16 +209,24 @@ const pozisyonDetayMarkup = /* html */`
 
   async function recalcCandidateScores(reqSkills, prefSkills) {
     try {
-      var res = await fetch(SB_URL + '/rest/v1/candidates?position_id=eq.' + posId + '&select=id,skills', { headers: sbHeaders() });
+      var res = await fetch(BACKEND_URL + '/api/candidates', { headers: sbHeaders() });
       if (!res.ok) return;
-      var candidates = await res.json();
+      var candidates = (await res.json()).filter(function(c){ return c.position_id === posId; });
       if (!candidates.length) return;
       await Promise.all(candidates.map(function(c) {
-        var newScore = calcScore(c.skills, reqSkills, prefSkills);
-        return fetch(SB_URL + '/rest/v1/candidates?id=eq.' + c.id, {
-          method: 'PATCH',
-          headers: sbHeaders(),
-          body: JSON.stringify({ score: newScore })
+        return fetch(BACKEND_URL + '/api/match-score', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ candidateSkills: c.skills || [], requiredSkills: reqSkills, preferredSkills: prefSkills })
+        }).then(function(scoreRes) {
+          return scoreRes.ok ? scoreRes.json() : null;
+        }).then(function(scoreData) {
+          var newScore = scoreData && typeof scoreData.score === 'number' ? scoreData.score : calcScore(c.skills, reqSkills, prefSkills);
+          return fetch(SB_URL + '/rest/v1/candidates?id=eq.' + c.id, {
+            method: 'PATCH',
+            headers: sbHeaders(),
+            body: JSON.stringify({ score: newScore })
+          });
         });
       }));
       showToast(candidates.length + ' adayın skoru güncellendi.', true);
@@ -246,15 +257,15 @@ const pozisyonDetayMarkup = /* html */`
 
   (async function() {
     var results = await Promise.all([
-      fetch(SB_URL + '/rest/v1/positions?id=eq.' + posId + '&select=*', { headers: sbHeaders() }).then(function(r){ return r.ok ? r.json() : []; }).catch(function(){ return []; }),
-      fetch(SB_URL + '/rest/v1/candidates?position_id=eq.' + posId + '&select=*&order=score.desc', { headers: sbHeaders() }).then(function(r){ return r.ok ? r.json() : []; }).catch(function(){ return []; }),
+      fetch(BACKEND_URL + '/api/positions', { headers: sbHeaders() }).then(function(r){ return r.ok ? r.json() : []; }).catch(function(){ return []; }),
+      fetch(BACKEND_URL + '/api/candidates', { headers: sbHeaders() }).then(function(r){ return r.ok ? r.json() : []; }).catch(function(){ return []; }),
     ]);
 
     document.getElementById('pos-loading').style.display = 'none';
 
     var r0   = Array.isArray(results[0]) ? results[0] : [];
-    var pos  = r0[0];
-    var cands = Array.isArray(results[1]) ? results[1] : [];
+    var pos  = r0.filter(function(p){ return p.id === posId; })[0];
+    var cands = (Array.isArray(results[1]) ? results[1] : []).filter(function(c){ return c.position_id === posId; });
 
     if (!pos) { document.getElementById('pos-notfound').style.display = 'block'; return; }
     currentPos = pos;
@@ -266,14 +277,15 @@ const pozisyonDetayMarkup = /* html */`
     document.getElementById('pos-title').textContent = pos.title;
 
     var badge = document.getElementById('pos-status-badge');
-    badge.textContent = pos.status === 'aktif' ? 'Aktif' : 'Kapalı';
-    badge.className = 'status-badge ' + (pos.status === 'aktif' ? 'status-active' : 'status-closed');
+    var isClosed = pos.status === 'kapali' || pos.status === 'pasif';
+    badge.textContent = isClosed ? 'Kapalı' : 'Aktif';
+    badge.className = 'status-badge ' + (isClosed ? 'status-closed' : 'status-active');
 
     document.getElementById('pos-meta').textContent =
       [pos.dept, pos.type, pos.level, pos.location].filter(Boolean).join(' · ');
 
     var toggleBtn = document.getElementById('toggle-status-btn');
-    toggleBtn.textContent = pos.status === 'aktif' ? 'Pasife Al' : 'Aktive Et';
+    toggleBtn.textContent = isClosed ? 'Aktive Et' : 'Pasife Al';
 
     if (pos.description) {
       var descEl = document.getElementById('pos-desc');
