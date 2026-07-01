@@ -81,6 +81,8 @@ const adayDetayMarkup = /* html */`
 <script>
 (function () {
   ${sbHelpers}
+  var SB_URL = '${SB_URL}';
+  var SB_KEY = '${SB_KEY}';
 
   var candidateId = window.location.pathname.split('/').pop();
   var statusMap = { inceleniyor:'status-review', mulakat:'status-interview', teklif:'status-offer', reddedildi:'status-rejected' };
@@ -134,7 +136,7 @@ const adayDetayMarkup = /* html */`
 
     var html = '';
     if (req.length) {
-      html += '<div style="margin-bottom:0.75rem"><div style="font-size:0.78rem;font-weight:700;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.4rem">Zorunlu Skill\'ler (%70)</div>';
+      html += '<div style="margin-bottom:0.75rem"><div style="font-size:0.78rem;font-weight:700;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.4rem">Zorunlu Skilllar (%70)</div>';
       html += req.map(function(s){ return chipHtml(s, candSkills.indexOf(s.toLowerCase())>-1, 'req'); }).join('');
       html += '</div>';
     }
@@ -146,7 +148,7 @@ const adayDetayMarkup = /* html */`
     var allPos = req.map(function(s){return s.toLowerCase();}).concat(pref.map(function(s){return s.toLowerCase();}));
     var extra = cand.skills.filter(function(s){ return allPos.indexOf(s.toLowerCase()) === -1; });
     if (extra.length) {
-      html += '<div><div style="font-size:0.78rem;font-weight:700;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.4rem">Diğer Skill\'ler</div>';
+      html += '<div><div style="font-size:0.78rem;font-weight:700;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.4rem">Diger Skilllar</div>';
       html += extra.map(function(s){ return '<span style="display:inline-flex;padding:0.3rem 0.65rem;border-radius:8px;font-size:0.78rem;font-weight:600;background:rgba(255,255,255,0.05);color:var(--text-tertiary);margin:0.2rem">'+s+'</span>'; }).join('');
       html += '</div>';
     }

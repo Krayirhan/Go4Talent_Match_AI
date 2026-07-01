@@ -99,6 +99,8 @@ const mulakatMarkup = /* html */`
 <script>
 (function() {
   ${sbHelpers}
+  var SB_URL = '${SB_URL}';
+  var SB_KEY = '${SB_KEY}';
 
   var currentPosId = null;
 
@@ -162,7 +164,7 @@ const mulakatMarkup = /* html */`
               (q.required ? '<span style="font-size:0.72rem;padding:0.15rem 0.5rem;border-radius:5px;background:rgba(194,245,66,0.1);color:#c2f542">Zorunlu</span>' : '') +
             '</div>' +
           '</div>' +
-          '<button onclick="deleteQuestion(\''+q.id+'\')" style="background:none;border:none;cursor:pointer;color:var(--text-tertiary);padding:0.25rem;border-radius:6px;flex-shrink:0" title="Sil">' +
+          '<button data-qid="'+q.id+'" onclick="deleteQuestion(this.dataset.qid)" style="background:none;border:none;cursor:pointer;color:var(--text-tertiary);padding:0.25rem;border-radius:6px;flex-shrink:0" title="Sil">' +
             '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>' +
           '</button>' +
         '</div>' +
@@ -183,7 +185,7 @@ const mulakatMarkup = /* html */`
           '<div style="font-size:0.75rem;color:var(--text-tertiary)">' + c.email + '</div>' +
         '</div>' +
         '<input readonly value="' + link + '" style="flex:2;min-width:200px;background:var(--surface-card-2);border:1px solid var(--surface-stroke);border-radius:8px;padding:0.4rem 0.75rem;font-size:0.78rem;color:var(--text-tertiary);cursor:text" onclick="this.select()">' +
-        '<button class="outline-btn" style="padding:0.4rem 0.75rem;font-size:0.78rem" onclick="navigator.clipboard.writeText(\''+link+'\').then(function(){this.textContent=\'Kopyalandı!\';var self=this;setTimeout(function(){self.textContent=\'Linki Kopyala\';},2000);}.bind(this))">Linki Kopyala</button>' +
+        '<button class="outline-btn" style="padding:0.4rem 0.75rem;font-size:0.78rem" data-link="'+link+'" onclick="var b=this;navigator.clipboard.writeText(b.dataset.link).then(function(){b.textContent=b.dataset.copied;setTimeout(function(){b.textContent=b.dataset.label;},2000);})" data-copied="Kopyalandi!" data-label="Linki Kopyala">Linki Kopyala</button>' +
       '</div>';
     }).join('');
   }
