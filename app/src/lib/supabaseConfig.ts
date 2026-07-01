@@ -1,5 +1,7 @@
-export const SB_URL = 'https://vewfghckacbdgacpnqef.supabase.co';
-export const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZld2ZnaGNrYWNiZGdhY3BucWVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4NDUwNTcsImV4cCI6MjA5ODQyMTA1N30.FqXZJibHciSDwi3w1RDSEZK3GJNyZ1u7vQXXdvsNc6w';
+export const SB_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://vewfghckacbdgacpnqef.supabase.co';
+export const SB_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+export const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001';
+export const ML_URL = process.env.NEXT_PUBLIC_ML_URL || 'http://localhost:5002';
 
 // Inline script'lerde kullanılacak ortak yardımcı kod (string olarak embed edilir)
 export const sbHelpers = `
