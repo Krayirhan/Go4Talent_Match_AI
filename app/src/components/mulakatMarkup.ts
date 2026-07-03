@@ -108,6 +108,7 @@ const mulakatMarkup = /* html */`
   (async function() {
     var res = await fetch(SB_URL + '/rest/v1/positions?select=id,title&order=created_at.desc', { headers: sbHeaders() });
     var positions = await res.json();
+    if (!Array.isArray(positions)) positions = [];
     var sel = document.getElementById('pos-select');
     positions.forEach(function(p) {
       var opt = document.createElement('option');

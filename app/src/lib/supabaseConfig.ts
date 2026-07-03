@@ -7,10 +7,14 @@ export const ML_URL = process.env.NEXT_PUBLIC_ML_URL || 'http://localhost:5002';
 export const sbHelpers = `
   var SB_URL = '${SB_URL}';
   var SB_KEY = '${SB_KEY}';
-  function getToken() { try { return localStorage.getItem('sb_access_token') || SB_KEY; } catch(e) { return SB_KEY; } }
+  function getToken() {
+    try {
+      return localStorage.getItem('sb_access_token') || sessionStorage.getItem('sb_access_token') || SB_KEY;
+    } catch(e) { return SB_KEY; }
+  }
   function isTokenExpired() {
     try {
-      var t = localStorage.getItem('sb_access_token');
+      var t = localStorage.getItem('sb_access_token') || sessionStorage.getItem('sb_access_token');
       if (!t) return true;
       var exp = JSON.parse(atob(t.split('.')[1])).exp;
       return exp && (Date.now() / 1000) > (exp - 60);
@@ -19,8 +23,9 @@ export const sbHelpers = `
   async function refreshTokenIfNeeded() {
     if (!isTokenExpired()) return;
     try {
-      var rt = localStorage.getItem('sb_refresh_token');
+      var rt = localStorage.getItem('sb_refresh_token') || sessionStorage.getItem('sb_refresh_token');
       if (!rt) return;
+      var usesLocal = !!localStorage.getItem('sb_refresh_token');
       var res = await fetch(SB_URL + '/auth/v1/token?grant_type=refresh_token', {
         method: 'POST',
         headers: { 'apikey': SB_KEY, 'Content-Type': 'application/json' },
@@ -28,19 +33,19 @@ export const sbHelpers = `
       });
       if (res.ok) {
         var data = await res.json();
-        if (data.access_token) localStorage.setItem('sb_access_token', data.access_token);
-        if (data.refresh_token) localStorage.setItem('sb_refresh_token', data.refresh_token);
+        var stor = usesLocal ? localStorage : sessionStorage;
+        if (data.access_token) stor.setItem('sb_access_token', data.access_token);
+        if (data.refresh_token) stor.setItem('sb_refresh_token', data.refresh_token);
       } else {
-        localStorage.removeItem('sb_access_token');
-        localStorage.removeItem('sb_refresh_token');
-        localStorage.removeItem('g4_user_email');
+        localStorage.removeItem('sb_access_token'); localStorage.removeItem('sb_refresh_token'); localStorage.removeItem('g4_user_email');
+        sessionStorage.removeItem('sb_access_token'); sessionStorage.removeItem('sb_refresh_token'); sessionStorage.removeItem('g4_user_email');
         window.location.replace('/login');
       }
     } catch(e) {}
   }
   function getUserId() {
     try {
-      var t = localStorage.getItem('sb_access_token');
+      var t = localStorage.getItem('sb_access_token') || sessionStorage.getItem('sb_access_token');
       if (!t) return null;
       var payload = JSON.parse(atob(t.split('.')[1]));
       return payload.sub || null;

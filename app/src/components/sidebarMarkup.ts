@@ -74,21 +74,38 @@ export const sidebarScript = `
   var SB_KEY = '${SB_KEY}';
   var BACKEND_URL = '${BACKEND_URL}';
 
-  // ── Session kontrolü ──
+  // ── Session kontrolü (localStorage + sessionStorage destekli) ──
   var email = '';
   var displayName = '';
-  try { email = localStorage.getItem('g4_user_email') || ''; } catch(e) {}
+  // Hem localStorage hem sessionStorage'ı kontrol et
+  try {
+    email = localStorage.getItem('g4_user_email') || sessionStorage.getItem('g4_user_email') || '';
+  } catch(e) {}
 
   if (!email) { window.location.replace('/login'); return; }
+
+  // Hangi storage kullanılmış bul
+  function getStorage() {
+    try {
+      if (localStorage.getItem('g4_user_email')) return localStorage;
+      if (sessionStorage.getItem('g4_user_email')) return sessionStorage;
+    } catch(e) {}
+    return localStorage;
+  }
+
+  function getStoredItem(key) {
+    try { return localStorage.getItem(key) || sessionStorage.getItem(key) || ''; } catch(e) { return ''; }
+  }
 
   // Token expire yakınsa refresh et
   (async function() {
     try {
-      var t = localStorage.getItem('sb_access_token');
+      var storage = getStorage();
+      var t = getStoredItem('sb_access_token');
       if (!t) return;
       var exp = JSON.parse(atob(t.split('.')[1])).exp;
       if (exp && (Date.now() / 1000) > (exp - 300)) {
-        var rt = localStorage.getItem('sb_refresh_token');
+        var rt = getStoredItem('sb_refresh_token');
         if (!rt) return;
         var res = await fetch(SB_URL + '/auth/v1/token?grant_type=refresh_token', {
           method: 'POST',
@@ -97,12 +114,11 @@ export const sidebarScript = `
         });
         if (res.ok) {
           var data = await res.json();
-          if (data.access_token) localStorage.setItem('sb_access_token', data.access_token);
-          if (data.refresh_token) localStorage.setItem('sb_refresh_token', data.refresh_token);
+          if (data.access_token)  storage.setItem('sb_access_token',  data.access_token);
+          if (data.refresh_token) storage.setItem('sb_refresh_token', data.refresh_token);
         } else {
-          localStorage.removeItem('sb_access_token');
-          localStorage.removeItem('sb_refresh_token');
-          localStorage.removeItem('g4_user_email');
+          localStorage.removeItem('sb_access_token'); localStorage.removeItem('sb_refresh_token'); localStorage.removeItem('g4_user_email');
+          sessionStorage.removeItem('sb_access_token'); sessionStorage.removeItem('sb_refresh_token'); sessionStorage.removeItem('g4_user_email');
           window.location.replace('/login');
         }
       }
@@ -135,7 +151,7 @@ export const sidebarScript = `
   var btn = document.getElementById('dash-logout');
   if (btn) btn.addEventListener('click', async function () {
     try {
-      var token = localStorage.getItem('sb_access_token') || '';
+      var token = getStoredItem('sb_access_token');
       if (token) {
         await fetch(SB_URL + '/auth/v1/logout', {
           method: 'POST',
@@ -143,7 +159,11 @@ export const sidebarScript = `
         });
       }
     } catch(e) {}
-    try { localStorage.removeItem('g4_user_email'); localStorage.removeItem('sb_access_token'); localStorage.removeItem('sb_refresh_token'); } catch(e) {}
+    // Her iki storage'ı da temizle
+    try {
+      localStorage.removeItem('g4_user_email'); localStorage.removeItem('sb_access_token'); localStorage.removeItem('sb_refresh_token');
+      sessionStorage.removeItem('g4_user_email'); sessionStorage.removeItem('sb_access_token'); sessionStorage.removeItem('sb_refresh_token');
+    } catch(e) {}
     window.location.href = '/login';
   });
 
